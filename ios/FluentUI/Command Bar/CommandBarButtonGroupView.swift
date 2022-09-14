@@ -27,6 +27,12 @@ class CommandBarButtonGroupView: UIView {
         preconditionFailure("init(coder:) has not been implemented")
     }
 
+    /// Update the passed button and hide the group view if necessary
+    func update(button: CommandBarButton) {
+        button.updateState()
+        hideGroupIfNeeded()
+    }
+
     private lazy var stackView: UIStackView = {
         let stackView = UIStackView(arrangedSubviews: buttons)
         stackView.translatesAutoresizingMaskIntoConstraints = false
@@ -54,6 +60,20 @@ class CommandBarButtonGroupView: UIView {
             buttons.first?.contentEdgeInsets.left += LayoutConstants.leftRightBuffer
             buttons.last?.contentEdgeInsets.right += LayoutConstants.leftRightBuffer
         }
+    }
+
+    /// If all views inside the `stackView` are hidden, the group itself should also be hidden. Otherwise the system spacers
+    /// will remain unhidden and cause additional visible space in the layout.
+    private func hideGroupIfNeeded() {
+        var allViewsHidden = true
+        for view in stackView.arrangedSubviews {
+            if !view.isHidden {
+                allViewsHidden = false
+                break
+            }
+        }
+
+        isHidden = allViewsHidden
     }
 
     private struct LayoutConstants {
