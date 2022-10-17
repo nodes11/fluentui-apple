@@ -107,6 +107,8 @@ class CommandBarButton: UIButton {
             titleLabel?.font = item.titleFont
         }
 
+        updateAccentImage(accentImage: item.accentImage)
+
         titleLabel?.isEnabled = isEnabled
 
         accessibilityLabel = (accessibilityDescription != nil) ? accessibilityDescription : title
@@ -133,6 +135,22 @@ class CommandBarButton: UIButton {
 
         return  UIColor(light: Colors.primaryTint30(for: window),
                         dark: Colors.primary(for: window))
+    }
+
+    private var accentImageView: UIImageView?
+
+    private func updateAccentImage(accentImage: UIImage?) {
+        if accentImage != accentImageView?.image {
+            if let accentImage = accentImage {
+                accentImageView = UIImageView(image: accentImage)
+                if let accentImageView = accentImageView, let imageView = imageView {
+                    insertSubview(accentImageView, belowSubview: imageView)
+                }
+            } else {
+                accentImageView?.removeFromSuperview()
+                accentImageView = nil
+            }
+        }
     }
 
     private func updateStyle() {
