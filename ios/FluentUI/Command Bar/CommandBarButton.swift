@@ -107,7 +107,7 @@ class CommandBarButton: UIButton {
             titleLabel?.font = item.titleFont
         }
 
-        updateAccentImage(accentImage: item.accentImage)
+        updateAccentImage(item.accentImage)
 
         titleLabel?.isEnabled = isEnabled
 
@@ -139,12 +139,13 @@ class CommandBarButton: UIButton {
 
     private var accentImageView: UIImageView?
 
-    private func updateAccentImage(accentImage: UIImage?) {
+    private func updateAccentImage(_ accentImage: UIImage?) {
         if accentImage != accentImageView?.image {
             if let accentImage = accentImage {
                 accentImageView = UIImageView(image: accentImage)
                 accentImageView?.translatesAutoresizingMaskIntoConstraints = false
-                if let accentImageView = accentImageView, let imageView = imageView {
+                if let accentImageView = accentImageView,
+                    let imageView = imageView {
                     insertSubview(accentImageView, belowSubview: imageView)
                     NSLayoutConstraint.activate([
                         accentImageView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
