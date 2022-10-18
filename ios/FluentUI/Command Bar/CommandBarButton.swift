@@ -143,8 +143,13 @@ class CommandBarButton: UIButton {
         if accentImage != accentImageView?.image {
             if let accentImage = accentImage {
                 accentImageView = UIImageView(image: accentImage)
+                accentImageView?.translatesAutoresizingMaskIntoConstraints = false
                 if let accentImageView = accentImageView, let imageView = imageView {
                     insertSubview(accentImageView, belowSubview: imageView)
+                    NSLayoutConstraint.activate([
+                        accentImageView.centerXAnchor.constraint(equalTo: imageView.centerXAnchor),
+                        accentImageView.centerYAnchor.constraint(equalTo: imageView.centerYAnchor)
+                    ])
                 }
             } else {
                 accentImageView?.removeFromSuperview()
