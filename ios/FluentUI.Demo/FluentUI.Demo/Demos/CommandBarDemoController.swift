@@ -75,6 +75,24 @@ class CommandBarDemoController: DemoController {
             }
         }
 
+        var accentImage: UIImage? {
+            switch self {
+            case .delete:
+                return UIImage(named: "delete24Filled")
+            default:
+                return nil
+            }
+        }
+
+        var accentImageTintColor: UIColor? {
+            switch self {
+            case .delete:
+                return Colors.communicationBlue
+            default:
+                return nil
+            }
+        }
+
         var title: String? {
             switch self {
             case .textStyle:
@@ -346,6 +364,9 @@ class CommandBarDemoController: DemoController {
             accessibilityHint: "sample accessibility hint"
         )
 
+        commandBarItem.accentImage = command.accentImage
+        commandBarItem.accentImageTintColor = command.accentImageTintColor
+
         if command == .customView {
             commandBarItem.customControlView = { () -> UIView in
                 let label = self.createLabelWithText("Custom View")
@@ -410,7 +431,7 @@ class CommandBarDemoController: DemoController {
         }
 
         if sender.isOn {
-            item.accentImage = Command.delete.accentImage?.withTintColor(Colors.communicationBlue, renderingMode: .alwaysOriginal)
+            item.accentImage = Command.delete.accentImage
         } else {
             item.accentImage = nil
         }
