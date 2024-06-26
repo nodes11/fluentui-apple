@@ -99,6 +99,10 @@ class BottomSheetDemoController: DemoController {
         bottomSheetViewController?.preferredWidth = sender.isOn ? 400 : 0
     }
 
+    @objc private func toggleTokenOverridesForBackgroundColor(_ sender: BooleanCell) {
+        bottomSheetViewController?.overrideTokens = sender.isOn ? [.backgroundColor: .uiColor { FluentTheme.shared.color(.dangerBackground2) } ] : nil
+    }
+
     @objc private func showTransientSheet() {
         let hostingVC = UIHostingController(rootView: BottomSheetDemoListContentView())
 
@@ -245,6 +249,8 @@ class BottomSheetDemoController: DemoController {
 
     private var isHiding: Bool = false
 
+    private var isUsingTokenOverrideBackgroundColor: Bool = false
+
     private var interactiveHidingAnimator: UIViewAnimating?
 
     private var demoOptionItems: [[DemoItem]] {
@@ -265,7 +271,11 @@ class BottomSheetDemoController: DemoController {
                 DemoItem(title: "Set preferred width to 400",
                           type: .boolean,
                         action: #selector(togglePreferredWidth),
-                          isOn: bottomSheetViewController?.preferredWidth == 400)
+                          isOn: bottomSheetViewController?.preferredWidth == 400),
+                DemoItem(title: "Apply backgroundColor token override",
+                          type: .boolean,
+                        action: #selector(toggleTokenOverridesForBackgroundColor),
+                          isOn: isUsingTokenOverrideBackgroundColor)
             ],
             [
                 DemoItem(title: "Show transient sheet", type: .action, action: #selector(showTransientSheet))

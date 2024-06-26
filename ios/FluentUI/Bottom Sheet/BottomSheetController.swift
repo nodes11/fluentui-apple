@@ -520,6 +520,11 @@ public class BottomSheetController: UIViewController, Shadowable, TokenizedContr
 
     public typealias TokenSetKeyType = BottomSheetTokenSet.Tokens
     public var tokenSet: BottomSheetTokenSet = .init()
+    public var overrideTokens: [BottomSheetToken: ControlTokenValue]? {
+        didSet {
+            tokenSet.replaceAllOverrides(with: overrideTokens)
+        }
+    }
 
     var fluentTheme: FluentTheme { return view.fluentTheme }
 
