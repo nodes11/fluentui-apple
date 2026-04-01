@@ -194,6 +194,7 @@ struct NotificationDemoView: View {
                                            expandButtonAction: (expandButtonMode == 2) ? { showAlert = true } : nil,
                                            messageButtonAction: messageButtonAction,
                                            swipeToDismissEnabled: swipeToDismissEnabled,
+                                           swipeUpToExpandEnabled: true,
                                            showFromBottom: showFromBottom,
                                            triggerModel: triggerModel)
                         .backgroundGradient(showBackgroundGradient ? backgroundGradient : nil)
@@ -252,6 +253,7 @@ struct NotificationDemoView: View {
                                showExpandButtonInPlaceOfDismissButton: expandButtonMode == 2,
                                expandButtonAction: (expandButtonMode == 2) ? { showAlert = true } : nil,
                                messageButtonAction: messageButtonAction,
+                               swipeUpToExpandEnabled: true,
                                showFromBottom: showFromBottom,
                                verticalOffset: verticalOffset,
                                triggerModel: triggerModel)

@@ -76,6 +76,9 @@ import SwiftUI
     /// If the swipe to dismiss gesture is enabled for the notification
     var swipeToDismissEnabled: Bool { get set }
 
+    /// If the swipe up to expand gesture is enabled for the notification
+    var swipeUpToExpandEnabled: Bool { get set }
+
     /// Defines whether the notification shows from the bottom of the presenting view or the top.
     var showFromBottom: Bool { get set }
 
@@ -122,6 +125,7 @@ public struct FluentNotification: View, TokenizedControlView {
     ///   - defaultDismissButtonAction: Action to be dispatched by the dismiss button of the trailing edge of the control.
     ///   - expandButtonAction: Action to be taken when showExpandButtonInPlaceOfDismissButton is enabled
     ///   - messageButtonAction: Action to be dispatched by tapping on the toast/bar notification.
+    ///   - swipeUpToExpandEnabled: If the swipe up to expand gesture is enabled for the notification.
     ///   - showFromBottom: Defines whether the notification shows from the bottom of the presenting view or the top.
     ///   - verticalOffset: How much to vertically offset the notification from its default position.
     public init(style: MSFNotificationStyle,
@@ -146,6 +150,7 @@ public struct FluentNotification: View, TokenizedControlView {
                 expandButtonAction: (() -> Void)? = nil,
                 messageButtonAction: (() -> Void)? = nil,
                 swipeToDismissEnabled: Bool = false,
+                swipeUpToExpandEnabled: Bool = false,
                 showFromBottom: Bool = true,
                 verticalOffset: CGFloat = 0.0,
                 triggerModel: FluentNotificationTriggerModel = FluentNotificationTriggerModel(),
@@ -169,6 +174,7 @@ public struct FluentNotification: View, TokenizedControlView {
                                              expandButtonAction: expandButtonAction,
                                              messageButtonAction: messageButtonAction,
                                              swipeToDismissEnabled: swipeToDismissEnabled,
+                                             swipeUpToExpandEnabled: swipeUpToExpandEnabled,
                                              showFromBottom: showFromBottom,
                                              verticalOffset: verticalOffset)
         state.onDismiss = onDismiss
@@ -432,6 +438,11 @@ public struct FluentNotification: View, TokenizedControlView {
                         messageAction()
                     }
                 }
+                .modifier(SwipeToExpand(onExpand: {
+                    if let customAction = state.expandButtonAction {
+                        customAction()
+                    }
+                }, enabled: state.swipeUpToExpandEnabled))
                 .modifier(SwipeToDismiss(onDismiss: {
                     isPresented = false
                     if let dismissButtonAction = state.defaultDismissButtonAction {
@@ -609,6 +620,7 @@ class MSFNotificationStateImpl: ControlState, MSFNotificationState {
     @Published var verticalOffset: CGFloat
     @Published var onDismiss: (() -> Void)?
     @Published var swipeToDismissEnabled: Bool
+    @Published var swipeUpToExpandEnabled: Bool
     @Published var showExpandButtonInPlaceOfDismissButton: Bool
     @Published var enableExandableMessageText: Bool
 
@@ -646,6 +658,7 @@ class MSFNotificationStateImpl: ControlState, MSFNotificationState {
                   expandButtonAction: nil,
                   messageButtonAction: nil,
                   swipeToDismissEnabled: false,
+                  swipeUpToExpandEnabled: false,
                   showFromBottom: true,
                   verticalOffset: 0.0)
     }
@@ -669,6 +682,7 @@ class MSFNotificationStateImpl: ControlState, MSFNotificationState {
          expandButtonAction: (() -> Void)? = nil,
          messageButtonAction: (() -> Void)? = nil,
          swipeToDismissEnabled: Bool = false,
+         swipeUpToExpandEnabled: Bool = false,
          showFromBottom: Bool = true,
          verticalOffset: CGFloat) {
         self.style = style
@@ -687,6 +701,7 @@ class MSFNotificationStateImpl: ControlState, MSFNotificationState {
         self.showDefaultDismissActionButton = showDefaultDismissActionButton ?? style.isToast
         self.showActionButtonAndDismissButton = showActionButtonAndDismissButton
         self.swipeToDismissEnabled = swipeToDismissEnabled
+        self.swipeUpToExpandEnabled = swipeUpToExpandEnabled
         self.defaultDismissButtonAction = defaultDismissButtonAction
         self.showExpandButtonInPlaceOfDismissButton = showExpandButtonInPlaceOfDismissButton
         self.expandButtonAction = expandButtonAction
@@ -760,5 +775,48 @@ struct SwipeToDismiss: ViewModifier {
 
         let fadeProgress = min(1.0, abs(horizontalOffset - fadeStartThreshold) / fadeRange)
         return 1.0 - (fadeProgress * 0.3) // Max 30% opacity reduction
+    }
+}
+
+struct SwipeToExpand: ViewModifier {
+    @State private var verticalOffset: CGFloat = 0
+    let onExpand: () -> Void
+    let enabled: Bool
+
+    // Constants for better maintainability
+    private let expandThreshold: CGFloat = 50
+    private let velocityThreshold: CGFloat = 200
+
+    func body(content: Content) -> some View {
+        content
+            .modifyIf(enabled) { view in
+                view
+                    .offset(y: verticalOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                // Only allow upward swipes
+                                guard value.translation.height < 0 else { return }
+
+                                // Apply rubber-banding effect for resistance
+                                let resistance: CGFloat = 0.5
+                                verticalOffset = value.translation.height * resistance
+                            }
+                            .onEnded { value in
+                                let velocity = value.predictedEndLocation.y - value.location.y
+                                let shouldExpand = verticalOffset < -expandThreshold || velocity < -velocityThreshold
+
+                                if shouldExpand {
+                                    // Trigger expand action
+                                    onExpand()
+                                }
+
+                                // Always snap back to original position
+                                withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    verticalOffset = 0
+                                }
+                            }
+                    )
+            }
     }
 }
